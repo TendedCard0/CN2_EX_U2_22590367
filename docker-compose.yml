@@ -19,3 +19,17 @@ services:
       - "8081:8080"
     deploy:
       replicas: 1
+
+  # --- LO NUEVO QUE DEBEN AGREGAR ---
+  app:
+    image: tendedcard/cn2-agendatec:v2.0.0 # Cambia a la etiqueta que estén usando
+    ports:
+      - "5000:5000"
+    environment:
+      # Swarm resuelve mágicamente el nombre "db" hacia su contenedor de Postgres
+      - DB_SERVER=db 
+      - DB_USER=postgres
+      - DB_PASSWORD=admin1234
+      - DB_NAME=cetech
+    deploy:
+      replicas: 2 # Pueden poner 2 o más para que Swarm balancee la carga entre Alan, Juan y Eddy

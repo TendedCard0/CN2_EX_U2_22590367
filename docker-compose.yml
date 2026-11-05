@@ -22,7 +22,7 @@ services:
 
   # --- LO NUEVO QUE DEBEN AGREGAR ---
   app:
-    image: tendedcard/cn2-agendatec:v2.0.0 # Cambia a la etiqueta que estén usando
+    image: tendedcard/cn2-agendatec:v1.0.0 # Cambia a la etiqueta que estén usando
     ports:
       - "5000:5000"
     environment:

@@ -1,0 +1,38 @@
+name: Build, push y desplegar
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  IMAGE: tendedcard/cn2-agendatec
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login en Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Construir y subir imagen (tag y latest)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.ref_name }}
+            ${{ env.IMAGE }}:latest
+
+      - name: Avisar a Jenkins para desplegar
+        run: |
+          curl --fail-with-body -sS -X POST \
+            --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_API_TOKEN }}" \
+            --data-urlencode "TAG=${{ github.ref_name }}" \
+            "${{ secrets.JENKINS_URL }}/job/CN2-deploy-desde-actions/buildWithParameters"

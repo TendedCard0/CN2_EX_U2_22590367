@@ -1,43 +1,48 @@
 version: '3.8'
 
+# Stack para Docker Swarm (se despliega desde Jenkins como "agendatec_stack").
+# La imagen de la app usa la variable TAG, que Jenkins recibe de GitHub Actions.
+
 services:
   db:
-    image: postgres:latest
+    image: postgres:16-alpine
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin1234
       POSTGRES_DB: cetech
     networks:
-      - red_multinube
+      - BD
     deploy:
       replicas: 1
       placement:
         constraints:
-          - node.labels.rol == basededatos 
+          - node.labels.rol == basededatos   # nodo worker de base de datos
 
   adminer:
     image: adminer
     ports:
       - "8081:8080"
     networks:
-      - red_multinube
+      - BD
     deploy:
       replicas: 1
 
   app:
-    image: tendedcard/cn2-agendatec:v1.0.0 
+    image: tendedcard/cn2-agendatec:${TAG:-latest}
     ports:
       - "5000:5000"
     environment:
-      - DB_SERVER=db 
-      - DB_USER=postgres
-      - DB_PASSWORD=admin1234
-      - DB_NAME=cetech
+      - DATABASE_URL=postgresql://postgres:admin1234@agendatec_stack_db:5432/cetech
     networks:
-      - red_multinube
+      - BD
+    depends_on:
+      - db
     deploy:
       replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
 
 networks:
-  red_multinube:
-    driver: overlay
+  BD:
+    external: true

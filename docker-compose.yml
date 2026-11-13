@@ -32,7 +32,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - DATABASE_URL=postgresql://postgres:admin1234@agendatec_stack_db:5432/cetech
+      - DATABASE_URL=postgresql+psycopg://postgres:admin1234@agendatec_stack_db:5432/cetech
     networks:
       - BD
     depends_on:
